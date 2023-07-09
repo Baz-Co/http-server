@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+  },
+  "tasks": {
+    "start": "deno run --allow-env --allow-read --allow-write --allow-net --watch=main.ts main.ts"
+  },
+  "imports": {
+    "oak": "https://deno.land/x/oak@v12.4.0/mod.ts"
+  }
+}
