@@ -1,9 +1,10 @@
 import * as dotenv from 'https://deno.land/std@0.193.0/dotenv/mod.ts'
+import { CORS } from "https://deno.land/x/oak_cors@v0.1.1/mod.ts";
 
 import { Application, helpers, Router } from 'oak'
 
 const env = await dotenv.load()
-if (Deno.env.get('LOGGING')) {
+if (env.LOGGING) {
   console.log('ENV VARS: ' + JSON.stringify(await env, null, 2))
 }
 
@@ -66,7 +67,7 @@ router
     while (items.has(id)) {
       id = self.crypto.randomUUID()
     }
-    items.set(id, { id: id, ...body })
+    items.set(id, { id: id, ...body, created: new Date() })
     await Deno.writeTextFile(
       './DATA.json',
       JSON.stringify(Array.from(items.entries()), null, 2),
@@ -77,7 +78,7 @@ router
     const { id } = helpers.getQuery(context, { mergeParams: true })
     const body = await context.request.body().value
     if (items.has(id)) {
-      items.set(id, { ...items.get(id), ...body })
+      items.set(id, { ...items.get(id), ...body, updated: new Date() })
       await Deno.writeTextFile(
         './DATA.json',
         JSON.stringify(Array.from(items.entries()), null, 2),
@@ -121,14 +122,15 @@ router
   })
 
 const app = new Application()
-app.addEventListener('listen', ({ hostname, port, secure }) => {
-  console.log(
-    `Listening on: ${secure ? 'https://' : 'http://'}${
-      hostname ?? 'localhost'
-    }:${port}`,
-  )
-})
+if (env.LOGGING) {
+  app.use((ctx, next) => {
+    console.log(`HTTP ${ctx.request.method} on ${ctx.request.url}`);
+    next();
+  })
+}
+app.use(CORS({ origin: "*" }));
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-await app.listen({ port: 8001 })
+
+await app.listen({ port: Number(env.PORT) })
