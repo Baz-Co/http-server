@@ -123,9 +123,9 @@ router
 
 const app = new Application()
 if (env.LOGGING) {
-  app.use((ctx, next) => {
+  app.use(async (ctx, next) => {
     console.log(`HTTP ${ctx.request.method} on ${ctx.request.url}`);
-    next();
+    await next();
   })
 }
 app.use(CORS({ origin: "*" }));
